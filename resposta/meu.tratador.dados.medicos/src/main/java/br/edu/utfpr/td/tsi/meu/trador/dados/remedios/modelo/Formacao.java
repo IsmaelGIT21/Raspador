@@ -1,4 +1,4 @@
-package br.edu.utfpr.td.tsi.meu.trador.dados.medicos.modelo;
+package br.edu.utfpr.td.tsi.meu.trador.dados.remedios.modelo;
 
 public class Formacao {
 

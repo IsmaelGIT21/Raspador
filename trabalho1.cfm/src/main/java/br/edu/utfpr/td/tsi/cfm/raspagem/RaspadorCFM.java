@@ -14,6 +14,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.By;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -94,11 +95,34 @@ public class RaspadorCFM {
         }
     }
 
-    private WebDriver criarDriver() {
+   /*  private WebDriver criarDriver() {
         ChromeOptions opcoes = new ChromeOptions();
         opcoes.addArguments("--start-maximized", "--lang=pt-BR");
         return new ChromeDriver(opcoes);
     }
+*/
+private WebDriver criarDriver() {
+    ChromeOptions opcoes = new ChromeOptions();
+    opcoes.addArguments("--start-maximized", "--lang=pt-BR");
+    
+    try {
+        // Alinha o Java para buscar o arquivo buster.crx que você acabou de renomear
+        java.net.URL resource = getClass().getClassLoader().getResource("buster.crx");
+        
+        if (resource != null) {
+            java.io.File arquivoExtensao = org.springframework.util.ResourceUtils.getFile(resource);
+            opcoes.addExtensions(arquivoExtensao);
+            logger.info("Extensão Buster acoplada com sucesso a partir dos recursos!");
+        } else {
+            logger.error("ERRO: O arquivo buster.crx não foi encontrado em src/main/resources/");
+        }
+    } catch (Exception e) {
+        logger.error("Erro ao carregar a extensão Buster: ", e);
+    }
+    
+    return new ChromeDriver(opcoes);
+}
+
 
     private void rasparUf(WebDriver driver, String uf, Consumer<List<MedicoBruto>> consumidor) {
         logger.info("Iniciando raspagem da UF {} ({} página(s))", uf, paginasPorUf);
@@ -152,11 +176,15 @@ public class RaspadorCFM {
         long limite = inicio + timeoutCaptchaSegundos * 1000;
         boolean avisouCaptcha = false;
 
+        WebDriver driver = (WebDriver) js;
+        
         List<MedicoBruto> medicos = null;
         Map<String, DetalheMedicoBruto> detalhes = new HashMap<>();
         Long momentoMedicos = null;
 
         while (System.currentTimeMillis() < limite) {
+
+            avisouCaptcha = tentarAcionarBuster(driver, avisouCaptcha);
             for (JsonObject resposta : lerRespostas(js)) {
                 String url = resposta.get("url").getAsString();
                 JsonArray dados = extrairDados(resposta.get("corpo").getAsString());
@@ -249,4 +277,29 @@ public class RaspadorCFM {
             throw new IllegalStateException("Raspagem interrompida", e);
         }
     }
+
+    /*
+    Procura o botão do Buster dentro do iframe do reCAPTCHA e clica nele.
+  Detecta se o CAPTCHA abriu na tela e avisa o usuário para interagir.
+ */
+private boolean tentarAcionarBuster(WebDriver driver, boolean avisouCaptcha) {
+    try {
+        // Procura se o iframe do reCAPTCHA está visível na tela
+        List<org.openqa.selenium.WebElement> iframes = driver.findElements(org.openqa.selenium.By.xpath("//iframe[contains(@title, 'desafio') or contains(@src, 'bframe')]"));
+        
+        if (!iframes.isEmpty() && iframes.get(0).isDisplayed()) {
+            if (!avisouCaptcha) {
+                logger.info("Dê um clique no botão verde do Buster na janela do Chrome para destravar o robô.");
+                avisouCaptcha = true; // Fixa o aviso para não spamar o terminal
+            }
+            pausar(2000); // Aguarda 2 segundos antes de checar novamente se a janela sumiu
+        } else {
+            avisouCaptcha = false; // Reseta o aviso assim que o CAPTCHA sumir da tela
+        }
+    } catch (Exception e) {
+        // Ignora erros de carregamento visual da página
+    }
+    return avisouCaptcha;
+}
+
 }

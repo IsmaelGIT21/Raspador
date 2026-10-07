@@ -1,3 +1,4 @@
+```java
 package br.edu.utfpr.td.tsi.cfm.etl;
 
 import br.edu.utfpr.td.tsi.cfm.modelo.Especialidade;
@@ -12,18 +13,13 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Converte o dado bruto do portal do CFM para o modelo normalizado {@link Medico}.
- */
 public class TransformadorMedico extends Transformador<MedicoBruto, Medico> {
 
     private static final Locale PT_BR = Locale.forLanguageTag("pt-BR");
 
-    /** Ex.: "CIRURGIA GERAL - RQE N.: 3497  / Área de atuação ..." */
     private static final Pattern ESPECIALIDADE_COM_RQE =
             Pattern.compile("^(.*?)\\s*-\\s*RQE\\s*N\\S*\\s*:?\\s*(\\d+).*$", Pattern.CASE_INSENSITIVE);
 
-    /** Ex.: "UNIVERSIDADE FEDERAL DO PARANÁ - CAMPUS COLOMBO" ou "UNIVERSIDADE FEDERAL DE SANTA CATARINA - SEDE" */
     private static final Pattern INSTITUICAO_COM_CAMPUS =
             Pattern.compile("^(.*?)\\s*-\\s*(?:CAMPUS\\s+(.+)|(SEDE))$", Pattern.CASE_INSENSITIVE);
 
@@ -53,7 +49,6 @@ public class TransformadorMedico extends Transformador<MedicoBruto, Medico> {
             return especialidades;
         }
 
-        // O portal separa as especialidades com '&'
         for (String item : especialidadesBrutas.split("&")) {
             String texto = normalizarTexto(item);
             if (texto.isEmpty()) {
@@ -63,7 +58,6 @@ public class TransformadorMedico extends Transformador<MedicoBruto, Medico> {
             if (matcher.matches()) {
                 especialidades.add(new Especialidade(matcher.group(1).toUpperCase(PT_BR), matcher.group(2)));
             } else {
-                // Sem RQE: descarta as áreas de atuação que vêm depois da barra
                 String descricao = texto.split("\\s/\\s")[0].trim();
                 especialidades.add(new Especialidade(descricao.toUpperCase(PT_BR), null));
             }
@@ -72,7 +66,6 @@ public class TransformadorMedico extends Transformador<MedicoBruto, Medico> {
     }
 
     Formacao transformarFormacao(MedicoBruto bruto) {
-        // Formados no exterior: a instituição de graduação é a faculdade estrangeira
         String instituicaoBruta = !vazio(bruto.getNmFaculdadeEstrangeiraGraduacao())
                 ? bruto.getNmFaculdadeEstrangeiraGraduacao()
                 : bruto.getNmInstituicaoGraduacao();
@@ -109,7 +102,6 @@ public class TransformadorMedico extends Transformador<MedicoBruto, Medico> {
         return ano;
     }
 
-    /** "SÃO JOSÉ DOS PINHAIS" -> "São José dos Pinhais" */
     String capitalizar(String texto) {
         String[] palavras = normalizarTexto(texto).toLowerCase(PT_BR).split(" ");
         StringBuilder resultado = new StringBuilder();
@@ -134,10 +126,11 @@ public class TransformadorMedico extends Transformador<MedicoBruto, Medico> {
         if (texto == null) {
             return "";
         }
-        return texto.replace(' ', ' ').replaceAll("\\s+", " ").trim();
+        return texto.replace(' ', ' ').replaceAll("\\s+", " ").trim();
     }
 
     private boolean vazio(String texto) {
         return texto == null || texto.isBlank();
     }
 }
+```

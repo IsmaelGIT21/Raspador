@@ -1,4 +1,0 @@
-spring.profiles.active=mongodb
-spring.mongodb.host=localhost
-spring.mongodb.port=27017
-spring.mongodb.database=medicos-cfm

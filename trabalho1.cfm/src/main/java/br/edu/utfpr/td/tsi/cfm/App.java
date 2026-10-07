@@ -18,15 +18,7 @@ import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.List;
 
-/**
- * Trabalho 1 - obtenção e tratamento dos dados públicos de médicos do CFM.
- * <p>
- * Etapa 1 (raspagem): coleta os dados do portal e persiste os dados brutos na coleção "medicos-brutos".
- * Etapa 2 (etl): usa o framework simples.etl (Extrator -> Transformador -> Carregador) para gerar
- * a coleção "medicos" com os dados tratados e normalizados.
- * <p>
- * Uso: java -jar trabalho1-cfm.jar [--cfm.etapa=raspagem|etl|tudo] [--cfm.ufs=PR,SC] [--cfm.paginas-por-uf=5]
- */
+
 @SpringBootApplication
 public class App implements CommandLineRunner {
 

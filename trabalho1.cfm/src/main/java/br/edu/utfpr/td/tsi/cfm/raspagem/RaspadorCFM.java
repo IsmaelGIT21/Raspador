@@ -1,4 +1,3 @@
-```java
 package br.edu.utfpr.td.tsi.cfm.raspagem;
 
 import br.edu.utfpr.td.tsi.cfm.modelo.DetalheMedicoBruto;
@@ -301,4 +300,3 @@ public class RaspadorCFM {
         return avisouCaptcha;
     }
 }
-```

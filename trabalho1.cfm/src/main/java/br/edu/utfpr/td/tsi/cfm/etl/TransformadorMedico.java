@@ -1,4 +1,3 @@
-```java
 package br.edu.utfpr.td.tsi.cfm.etl;
 
 import br.edu.utfpr.td.tsi.cfm.modelo.Especialidade;
@@ -133,4 +132,3 @@ public class TransformadorMedico extends Transformador<MedicoBruto, Medico> {
         return texto == null || texto.isBlank();
     }
 }
-```
